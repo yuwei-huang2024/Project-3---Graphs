@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unordered_map>
 
 #include "CampusCompass.h"
 
@@ -6,7 +7,7 @@ using namespace std;
 
 int main() {
     // initialize your main project object
-    CampusCompass compass;
+    CampusCompass compass = CampusCompass();
 
     // ingest CSV data
     compass.ParseCSV("../data/edges.csv", "../data/classes.csv");
