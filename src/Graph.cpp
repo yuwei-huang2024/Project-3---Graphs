@@ -1,5 +1,9 @@
 #include "Graph.h"
 #include <algorithm>
+#include <limits>
+#include <queue>
+
+using namespace std;
 
 Edge::Edge(int gFrom, int gTo, int gTime) {
     from = gFrom;
@@ -54,6 +58,46 @@ string Graph::checkEdge(int from, int to) {
         }
     }
     return "DNE";
+}
+
+//for me later, initialize dist and predecessor
+bool Graph::dijkstra(int src, vector<int>& dist, vector<int>& predecessor) {
+    int n = graph.size();
+    if (src < 0 || src >= n) {
+        return false;
+    }
+
+    const int infinity = numeric_limits<int>::max();
+
+    dist.assign(n, infinity);
+    predecessor.assign(n, -1);
+
+    using Node = pair<int, int>;
+    priority_queue<Node, vector<Node>, greater<Node>> pq;
+
+    dist[src] = 0;
+    pq.push({0, src});
+
+    while (!pq.empty()) {
+        auto [d, u] = pq.top();
+        pq.pop();
+        if (d > dist[u]) {
+            continue;
+        }
+        for (Edge& e : graph[u]) {
+            if (!e.getClosed()) {
+                int v = e.getTo();
+                int w = e.getTime();
+
+                if (dist[u] != infinity && dist[u] + w < dist[v]) {
+                    dist[v] = dist[u] + w;
+                    predecessor[v] = u;
+                    pq.push({dist[v], v});
+                }
+            }
+        }
+    }
+    return true;
 }
 
 bool Graph::isConnected(int from, int to) {

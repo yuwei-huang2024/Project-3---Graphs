@@ -16,11 +16,6 @@ public:
     void toggleClosed();
 };
 
-class pathTracker {
-    vector<int> distance;
-    vector<string> parent;
-};
-
 class Graph {
     vector<vector<Edge>> graph;
 public:
@@ -31,4 +26,5 @@ public:
     bool isConnected(int from, int to);
     int printShortestEdges(int from, int to);
     int zoneCalc(int residenceId, const vector<int>& classes) const;
+    bool dijkstra(int src, vector<int>& dist, vector<int>& predecessor);
 };
