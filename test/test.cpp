@@ -1,5 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
+
+#include "CampusCompass.h"
+#include "Graph.h"
 #include "Student.h"
 
 // #include "CampusCompass.h"
@@ -22,27 +25,51 @@ TEST_CASE("test Student Class", "[student]") {
   James.replaceClass("class1", "class2");
   REQUIRE(James.getClasses() == vector<string>{"class2"});
 }
-//
-// TEST_CASE("Test 2", "[tag]") {
-//   // you can also use "sections" to share setup code between tests, for example:
-//   int one = 1;
-//
-//   SECTION("num is 2") {
-//     int num = one + 1;
-//     REQUIRE(num == 2);
-//   };
-//
-//   SECTION("num is 3") {
-//     int num = one + 2;
-//     REQUIRE(num == 3);
-//   };
-//
-//   // each section runs the setup code independently to ensure that they don't
-//   // affect each other
-// }
 
-// You must write 5 unique, meaningful tests for credit on the testing section
-// of this project!
+TEST_CASE("test graph", "[graph]") {
+  Graph g = Graph();
+  REQUIRE(g.addEdge(1, 2, 5));
+  g.addEdge(2, 3, 5);
+  g.addEdge(1, 3, 20);
+  g.addEdge(4, 5, 30);
+  g.toggleEdge(1, 3);
+  REQUIRE(g.checkEdge(1, 3) == "closed");
+  REQUIRE(g.checkEdge(1, 2) == "open");
+  REQUIRE(g.checkEdge(2, 3) == "open");
+  REQUIRE(g.checkEdge(3, 4) == "DNE");
+  g.toggleEdge(1, 3);
+  REQUIRE(g.checkEdge(1, 3) == "open");
+  REQUIRE(g.isConnected(1,3) == true);
+  REQUIRE(g.isConnected(1,4) == false);
+  REQUIRE(g.printShortestEdges(1,3) == 10);
+}
+
+TEST_CASE("test reading csv", "[csv]") {
+  string edges = "data/edges.csv";
+  string classes = "data/classes.csv";
+
+  CampusCompass c = CampusCompass();
+  c.ParseCSV(edges, classes);
+
+  REQUIRE_FALSE(c.GetGraph().isConnected(33, 55)); //should not be
+  REQUIRE(c.GetGraph().isConnected(32, 29)); //should be
+  c.GetGraph().toggleEdge(32, 29); //close that edge
+  REQUIRE(c.GetGraph().checkEdge(32, 29) == "closed");
+  REQUIRE_FALSE(c.GetGraph().isConnected(32, 29)); //should not be
+  c.GetGraph().toggleEdge(32, 29); // open edge
+  REQUIRE(c.GetGraph().isConnected(32, 29)); //connected again
+  REQUIRE(c.GetGraph().printShortestEdges(9, 32) == 4);
+  // int num = c.GetGraph().printShortestEdges(3, 5);
+  // cout << num << endl;
+  REQUIRE(c.GetGraph().printShortestEdges(3, 5) == 9);
+
+
+  int Num = 1;
+  REQUIRE(Num == 1);
+
+}
+
+
 
 // See the following for an example of how to easily test your output.
 // Note that while this works, I recommend also creating plenty of unit tests for particular functions within your code.

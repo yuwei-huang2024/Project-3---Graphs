@@ -24,9 +24,13 @@ void Edge::toggleClosed() {
     closed = !closed;
 }
 
+Graph::Graph() {
+    vector<vector<Edge>> graph;
+}
+
 bool Graph::addEdge(int from, int to, int time) {
     int size = max(from, to);
-    if (size >= graph.size()) {
+    if (size >= static_cast<int>(graph.size())) {
         graph.resize(size + 1);
     }
     graph[from].emplace_back(from, to, time);
@@ -101,11 +105,31 @@ bool Graph::dijkstra(int src, vector<int>& dist, vector<int>& predecessor) {
 }
 
 bool Graph::isConnected(int from, int to) {
-    return true;
+    const int infinity = numeric_limits<int>::max();
+    vector<int> dist, predecessor;
+    dijkstra(from, dist, predecessor);
+    if (dist[to] != infinity) {
+        return true;
+    }
+    return false;
 }
+
 int Graph::printShortestEdges(int from, int to) {
-    return 0;
+    const int infinity = numeric_limits<int>::max();
+    vector<int> dist, predecessor;
+    dijkstra(from, dist, predecessor);
+
+    if (dist[to] != infinity) {
+        return dist[to];
+    }
+    return -1;
 }
+
 int Graph::zoneCalc(int residenceId, const vector<int>& classes) const {
     return 0;
+}
+
+//for testing
+void Graph::printEdges() {
+
 }

@@ -11,4 +11,7 @@ class Class {
     string endTime;
 public:
     Class(string gLocationId, string gStartTime, string gEndTime);
+    string getLocationId();
+    string getStartTime();
+    string getEndTime();
 };

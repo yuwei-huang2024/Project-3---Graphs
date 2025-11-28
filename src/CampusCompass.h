@@ -16,6 +16,9 @@ public:
     CampusCompass();
     bool ParseCSV(const string &edges_filepath, const string &classes_filepath);
     bool ParseCommand(const string &command);
+    Graph& GetGraph();
+    unordered_map<string, Student> GetStudents();
+    unordered_map<string, Class> GetClasses();
     bool insert (string name, string id, string residence, vector<string> classCodes);
     bool remove (string id);
     bool dropClass(string id, string classCode);
