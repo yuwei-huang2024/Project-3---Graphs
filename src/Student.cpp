@@ -7,6 +7,7 @@ Student::Student(string gName, string gID, int gResidence) {
   name = gName;
   id = gID;
   residence = gResidence;
+  vector<string> classes;
 }
 
 bool Student::isClass(string code) {

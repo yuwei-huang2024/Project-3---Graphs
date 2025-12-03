@@ -6,21 +6,18 @@
 using namespace std;
 
 int main() {
-    // initialize your main project object
     CampusCompass compass = CampusCompass();
-
-    // ingest CSV data
-    compass.ParseCSV("../data/edges.csv", "../data/classes.csv");
-
-    // the below is example code for parsing commandline input
-    int no_of_lines;
+    compass.ParseCSV("data/edges.csv", "data/classes.csv");
     string command;
-    cin >> no_of_lines;
-    cin.ignore(); // ignore newline that first cin left over
+    getline(cin, command);
+    int no_of_lines = stoi(command);
+
     for (int i = 0; i < no_of_lines; i++) {
         getline(cin, command);
-
-        // parse your commands however you see fit
         compass.ParseCommand(command);
     }
 }
+
+// compass.insert("insert \"Student C\" 10000003 1 2 COP3502 MAC2311");
+// compass.replaceClass("10000003", "COP3502", "ReplacedClass");
+// compass.replaceClass("10000003", "RandomName", "ReplacedClass");

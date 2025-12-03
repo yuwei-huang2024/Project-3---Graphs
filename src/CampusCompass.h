@@ -5,6 +5,7 @@
 #include "Class.h"
 #include "Graph.h"
 #include "unordered_map"
+#include "map"
 
 using namespace std;
 
@@ -19,10 +20,15 @@ public:
     Graph& GetGraph();
     unordered_map<string, Student> GetStudents();
     unordered_map<string, Class> GetClasses();
-    bool insert (string name, string id, string residence, vector<string> classCodes);
-    bool remove (string id);
-    bool dropClass(string id, string classCode);
-    bool replaceClass(string id, string classCode1, string classCode2);
-    bool removeClass(string classCode);
+    bool checkID (string id);
+    string insert (const string &command);
+    string remove (string id);
+    string dropClass(string id, string classCode);
+    string replaceClass(string id, string classCode1, string classCode2);
+    int removeClass(string classCode);
+    string toggleEdgesClosure(int n, vector<int> edges);
+    string checkEdgeStatus(int edge1, int edge2);
+    string isConnected(int edge1, int edge2);
+    map<string, int> printShortestEdges(string id);
     string verifySchedule(string id);
 };

@@ -69,7 +69,40 @@ TEST_CASE("test reading csv", "[csv]") {
 
 }
 
+TEST_CASE("test campusCompass", "[csv]") {
+  CampusCompass c;
+  c.ParseCSV("data/edges.csv", "data/classes.csv");
+  REQUIRE(c.insert("insert \"Student A\" 10000001 1 1 COP3502") == "successful");
+  REQUIRE(c.insert("insert \"Student B\" 10000002 1 1 COP3502") == "successful");
+  REQUIRE(c.insert("insert \"Student C\" 10000003 1 2 COP3502 MAC2311") == "successful");
+  c.remove("10000003");
+  c.remove("10000002");
+  unordered_map<string, Student> myMap = c.GetStudents();
+  REQUIRE(myMap.size() == 1);
+  REQUIRE(c.insert("insert \"Student C\" 10000003 1 2 COP3502 MAC2311") == "successful");
+  myMap = c.GetStudents(); // students a and c
+  REQUIRE(myMap.size() == 2);
+  c.dropClass("10000001", "COP3502"); //should also remove a
+  myMap = c.GetStudents(); // student c
+  REQUIRE(myMap.size() == 1);
 
+  REQUIRE(c.replaceClass("10000003", "COP3502", "MAC2312") == "successful");
+  REQUIRE(c.replaceClass("10000003", "RandomName", "MAC2312") == "unsuccessful");
+}
+
+TEST_CASE("test removeClass", "[csv]") {
+  CampusCompass c;
+  c.ParseCSV("data/edges.csv", "data/classes.csv");
+  c.insert("insert \"Student A\" 10000001 1 1 COP3502");
+  c.insert("insert \"Student B\" 10000002 1 1 COP3502");
+  c.insert("insert \"Student C\" 10000003 1 1 COP3502");
+  c.insert("insert \"Student D\" 10000004 1 1 COP3502");
+  c.insert("insert \"Student E\" 10000005 1 1 COP3502");
+
+  REQUIRE(c.removeClass("COP3502") == 5);
+  REQUIRE(c.GetStudents().empty());
+
+}
 
 // See the following for an example of how to easily test your output.
 // Note that while this works, I recommend also creating plenty of unit tests for particular functions within your code.
