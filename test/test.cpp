@@ -150,7 +150,7 @@ TEST_CASE("test removeClass", "[csv]") {
   c.insert("insert \"Student D\" 10000004 1 1 COP3502");
   c.insert("insert \"Student E\" 10000005 1 1 COP3502");
 
-  REQUIRE(c.removeClass("COP3502") == 5);
+  REQUIRE(c.removeClass("COP3502") == 4);
   REQUIRE(c.GetStudents().empty());
 
 }

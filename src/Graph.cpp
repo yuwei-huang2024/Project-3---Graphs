@@ -186,7 +186,7 @@ int Graph::zoneCalc(int residenceId, const vector<int>& classes) {
     nodes.insert(residenceId);
     for (int classLocation : classes) {
         int v = classLocation;
-        while (v != residenceId) {
+        while (prev[v] != -1 && v != residenceId) {
             int u = prev[v];
             nodes.insert(u);
             nodes.insert(v);

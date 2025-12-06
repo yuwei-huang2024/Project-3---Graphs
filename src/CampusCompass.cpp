@@ -121,7 +121,7 @@ bool CampusCompass::ParseCommand(const string &command) {
         int location;
         vector<int> edges;
         ss >> n;
-        for (int i = 0; i <= n; i++) {
+        for (int i = 0; i < n * 2; i++) {
             ss >> location;
             edges.push_back(location);
         }
@@ -354,7 +354,7 @@ int CampusCompass::removeClass(string classCode) {
 string CampusCompass::toggleEdgesClosure(int n, vector<int> edges) {
     for (int i = 0; i <= n / 2; i++) {
         int edge1 = edges[i * 2];
-        int edge2 = edges[i * 2 + 1];
+        int edge2 = edges[(i * 2) + 1];
         this->graph.toggleEdge(edge1, edge2);
     }
     return "successful";

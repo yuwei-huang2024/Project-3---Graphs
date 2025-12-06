@@ -17,8 +17,3 @@ int main() {
         compass.ParseCommand(command);
     }
 }
-
-// compass.insert("insert \"Student C\" 10000003 1 2 COP3502 MAC2311");
-// compass.replaceClass("10000003", "COP3502", "ReplacedClass");
-// compass.replaceClass("10000003", "RandomName", "ReplacedClass");
-
