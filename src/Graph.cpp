@@ -136,28 +136,39 @@ int Graph::MST(unordered_set<int>& vertices) {
         }
     }
 
+    int needed = 0;
+    int start = -1;
+    for (int i = 0; i < n; ++i) {
+        if (inZone[i]) {
+            ++needed;
+            if (start == -1) start = i;
+        }
+    }
+
     vector<bool> inMST(n, false);
-    typedef pair<int, int> Node;
+    using Node = pair<int, int>;
     priority_queue<Node, vector<Node>, greater<Node>> pq;
-    int start = *vertices.begin();
     pq.push(make_pair(0, start));
 
     int totalCost = 0;
     int visitedCount = 0;
-    int needed = (int)vertices.size();
 
+    // recursive minimum tree, works logically like bfs
     while (!pq.empty() && visitedCount < needed) {
-        Node top = pq.top();
+        auto top = pq.top();
         pq.pop();
         int w = top.first;
         int u = top.second;
+
         if (!inZone[u] || inMST[u]) {
             continue;
         }
+
         inMST[u] = true;
         visitedCount++;
         totalCost += w;
 
+        // add all neighbors here
         for (Edge &e : graph[u]) {
             int v = e.getTo();
             if (!e.getClosed() && inZone[v] && !inMST[v]) {
@@ -175,7 +186,7 @@ int Graph::zoneCalc(int residenceId, const vector<int>& classes) {
     nodes.insert(residenceId);
     for (int classLocation : classes) {
         int v = classLocation;
-        while (v != -1 && v != residenceId) {
+        while (v != residenceId) {
             int u = prev[v];
             nodes.insert(u);
             nodes.insert(v);
