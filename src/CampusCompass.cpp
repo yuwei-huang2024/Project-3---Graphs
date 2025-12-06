@@ -426,26 +426,29 @@ int timeConvertor(string time) {
 vector<classGap> CampusCompass::verifySchedule(string ID) {
     vector<classGap> v;
 
-    //find student
+    // find student; return empty vector if not found
     auto it = students.find(ID);
+    if (it == students.end()) {
+        return v;
+    }
     Student &s = it->second;
 
     //find their classes
     vector<string> sClasses = s.getClasses();
 
     //if one class, return nothing -> print unsuccessful
-    if (sClasses.size() <= 0) {
+    if (sClasses.size() <= 1) {
         return v;
     }
 
-    //sort all classes by start time?
+    // sort classes by start time (in minutes). If a class is missing,
+    // treat its time as very large so it sorts to the end. Tie-break
+    // using the class code for a deterministic order.
     sort(sClasses.begin(), sClasses.end(), [&](const string& a, const string& b) {
-        Class& ca = classes.at(a);
-        Class& cb = classes.at(b);
-
-        int t1 = timeConvertor(ca.getStartTime());
-        int t2 = timeConvertor(cb.getStartTime());
-
+        auto ita = classes.find(a);
+        auto itb = classes.find(b);
+        int t1 = timeConvertor(ita->second.getStartTime());
+        int t2 = timeConvertor(itb->second.getStartTime());
         return t1 < t2;
     });
 
@@ -453,9 +456,17 @@ vector<classGap> CampusCompass::verifySchedule(string ID) {
     //find distance between first class location and next class location
     //save in vector
 
-    for (int i = 0; i <= static_cast<int>(sClasses.size()) - 1; i++) {
-        Class& ca = classes.at(sClasses[i]);
-        Class& cb = classes.at(sClasses[i + 1]);
+    for (size_t i = 0; i + 1 < sClasses.size(); ++i) {
+        auto itCa = classes.find(sClasses[i]);
+        auto itCb = classes.find(sClasses[i + 1]);
+        if (itCa == classes.end() || itCb == classes.end()) {
+            // missing class info -> mark as cannot make
+            classGap newClassGap(sClasses[i], sClasses[i + 1], false);
+            v.push_back(newClassGap);
+            continue;
+        }
+        Class& ca = itCa->second;
+        Class& cb = itCb->second;
         int endTime = timeConvertor(ca.getEndTime());
         int startTime = timeConvertor(cb.getStartTime());
         int difference = startTime - endTime;

@@ -3,6 +3,13 @@ LocationID_1,LocationID_2,Name_1,Name_2,Time
 1,2,Place1,Place2,4
 1,4,Place1,Place4,5
 4,3,Place4,Place3,5
+1,5,sdf,sdf,2
+5,6,sdf,sssdf,1
+1,7,sfsd,sdfsd,3
+1,8,2sdf,sdf,1
+7,8,sdf,sdf,3
+8,4,sdf,sdf,2
+
 
 LocationID_1,LocationID_2,Name_1,Name_2,Time
 1,2,Hume Hall,Graham Hall,3
