@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <limits>
 #include <queue>
+#include <vector>
+#include <unordered_set>
 
 using namespace std;
 
@@ -10,13 +12,13 @@ Edge::Edge(int gFrom, int gTo, int gTime) {
     to = gTo;
     time = gTime;
 }
-int Edge::getTo() {
+int Edge::getTo() const {
     return to;
 }
-int Edge::getTime() {
+int Edge::getTime() const {
     return time;
 }
-bool Edge::getClosed() {
+bool Edge::getClosed() const {
     return closed;
 }
 
@@ -125,8 +127,64 @@ int Graph::printShortestEdges(int from, int to) {
     return -1;
 }
 
-int Graph::zoneCalc(int residenceId, const vector<int>& classes) const {
-    return 0;
+int Graph::MST(unordered_set<int>& vertices) {
+    int n = graph.size();
+    vector<bool> inZone(n, false);
+    for (int v : vertices) {
+        if (v >= 0 && v < n) {
+            inZone[v] = true;
+        }
+    }
+
+    vector<bool> inMST(n, false);
+    typedef pair<int, int> Node;
+    priority_queue<Node, vector<Node>, greater<Node>> pq;
+    int start = *vertices.begin();
+    pq.push(make_pair(0, start));
+
+    int totalCost = 0;
+    int visitedCount = 0;
+    int needed = (int)vertices.size();
+
+    while (!pq.empty() && visitedCount < needed) {
+        Node top = pq.top();
+        pq.pop();
+        int w = top.first;
+        int u = top.second;
+        if (!inZone[u] || inMST[u]) {
+            continue;
+        }
+        inMST[u] = true;
+        visitedCount++;
+        totalCost += w;
+
+        for (Edge &e : graph[u]) {
+            int v = e.getTo();
+            if (!e.getClosed() && inZone[v] && !inMST[v]) {
+                pq.push(make_pair(e.getTime(), v));
+            }
+        }
+    }
+    return totalCost;
+}
+
+int Graph::zoneCalc(int residenceId, const vector<int>& classes) {
+    vector<int> dist, prev;
+    dijkstra(residenceId, dist, prev);
+    unordered_set<int> nodes;
+    nodes.insert(residenceId);
+    for (int classLocation : classes) {
+        int v = classLocation;
+        while (v != -1 && v != residenceId) {
+            int u = prev[v];
+            nodes.insert(u);
+            nodes.insert(v);
+            v = u;
+        }
+    }
+
+    int cost = MST(nodes);
+    return cost;
 }
 
 //for testing

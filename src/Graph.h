@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <unordered_set>
 using namespace std;
 
 class Edge {
@@ -10,9 +11,9 @@ class Edge {
     bool closed = false; //default is opened
 public:
     Edge(int gFrom, int gTo, int gTime);
-    int getTo();
-    int getTime();
-    bool getClosed();
+    int getTo() const;
+    int getTime() const;
+    bool getClosed() const;
     void toggleClosed();
 };
 
@@ -25,8 +26,8 @@ public:
     string checkEdge(int from, int to);
     bool isConnected(int from, int to);
     int printShortestEdges(int from, int to);
-    //need to implement
-    int zoneCalc(int residenceId, const vector<int>& classes) const;
+    int zoneCalc(int residenceId, const vector<int>& classes);
     bool dijkstra(int src, vector<int>& dist, vector<int>& predecessor);
     void printEdges();
+    int MST(unordered_set<int>& vertices);
 };

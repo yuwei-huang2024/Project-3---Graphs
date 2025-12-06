@@ -1,8 +1,12 @@
 #include "CampusCompass.h"
+
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <set>
+#include <regex>
 
 using namespace std;
 
@@ -153,10 +157,38 @@ bool CampusCompass::ParseCommand(const string &command) {
         return true;
     }
     else if (word == "printStudentZone") {
-        cout << "printStudentZone" << endl;
+        string ID;
+        ss >> ID;
+        int results = printStudentZone(ID);
+        auto it = students.find(ID);
+        Student &s = it->second;
+        cout << "Student Zone Cost For " << s.getName() << ": "<< results << endl;
+        return true;
     }
     else if (word == "verifySchedule") {
-        cout << "verifySchedule" << endl;
+        string ID;
+        ss >> ID;
+        vector<classGap> results = verifySchedule(ID);
+        if (results.size() == 0) {
+            cout << "unsuccessful" << endl;
+            return false;
+        }
+        auto it = students.find(ID);
+        Student &s = it->second;
+        cout << "Schedule Check for " << s.getName() << ":" << endl;
+        for (auto it = results.begin(); it != results.end(); it++) {
+            string classFrom = it->getFromClass();
+            string classTo = it->getToClass();
+            bool canMake = it->getCanMake();
+            cout << classFrom << "-" << classTo;
+            if (canMake) {
+                cout << " \"Can make it!\"" << endl;
+            }
+            else {
+                cout << " \"Cannot make it!\"" << endl;
+            }
+        }
+        return true;
     }
     cout << "unsuccessful" << endl;
     return false;
@@ -181,6 +213,14 @@ bool CampusCompass::checkID (string ID) { //return true if exists
     return false;
 }
 
+bool CampusCompass::isClassCode (string code) {
+    regex pattern("^[A-Z]{3}[0-9]{4}$");
+    if (!regex_match(code, regex(pattern))) {
+        return false;
+    }
+    return true;
+}
+
 string CampusCompass::insert (const string &command) {
     //get first word, don't need
     vector<string> row;
@@ -203,14 +243,26 @@ string CampusCompass::insert (const string &command) {
 
     string id = row[2];
     int location = stoi(row[3]);
+    //less than 1 class
+    if (row.size() < 6) {return "unsuccessful";}
     int num = stoi(row[4]);
 
-    if (checkID (id)) {
-        return "unsuccessful";
-    }
+    //uf id is 8 long, numbers
+    regex pattern("^[0-9]{8}$");
+    regex pattern2("^[A-Za-z ]+$");
+    if (!(regex_match(id, regex(pattern)))) {return "unsuccessful";}
+    ///name is alphabet
+    if (!(regex_match(name, regex(pattern2)))) {return "unsuccessful";}
+    //student already exists based on ID
+    if (checkID (id)) {return "unsuccessful";}
+    //more than 6 classes
+    if (num > 6) {return "unsuccessful";}
+    //see if classes and num matches
+    if (num != static_cast<int>(row.size()) - 5) {return "unsuccessful";}
 
     Student newStudent(name, id, location);
     for (int i = 0; i < num; i++) {
+        if (!isClassCode (row[5 + i])) {return "unsuccessful";}
         newStudent.addClass(row[5 + i]);
     }
     this->students.emplace(id, newStudent);
@@ -345,12 +397,81 @@ map<string, int> CampusCompass::printShortestEdges(string ID) {
     return distances;
 }
 
+int CampusCompass::printStudentZone(string id) {
+    //get all class location ids
+    auto it = students.find(id);
+    Student &s = it->second;
+    int residence = s.getResidence();
+    vector<string> sClasses = s.getClasses();
+    vector<int> classIDs;
+    for (int i = 0; i < static_cast<int>(sClasses.size()); i++) {
+        auto itClass = classes.find(sClasses[i]);
+        if (itClass == classes.end()) {
+            continue;
+        }
+        int location = stoi(itClass->second.getLocationId());
+        classIDs.push_back(location);
+    }
+
+    int cost = graph.zoneCalc(residence, classIDs);
+    return cost;
+}
+
 int timeConvertor(string time) {
     int hours = stoi(time.substr(0, 2));
     int minutes = stoi(time.substr(3, 2));
     return hours * 60 + minutes;
 }
 
-string CampusCompass::verifySchedule(string id) {
-    return "";
+vector<classGap> CampusCompass::verifySchedule(string ID) {
+    vector<classGap> v;
+
+    //find student
+    auto it = students.find(ID);
+    Student &s = it->second;
+
+    //find their classes
+    vector<string> sClasses = s.getClasses();
+
+    //if one class, return nothing -> print unsuccessful
+    if (sClasses.size() <= 0) {
+        return v;
+    }
+
+    //sort all classes by start time?
+    sort(sClasses.begin(), sClasses.end(), [&](const string& a, const string& b) {
+        Class& ca = classes.at(a);
+        Class& cb = classes.at(b);
+
+        int t1 = timeConvertor(ca.getStartTime());
+        int t2 = timeConvertor(cb.getStartTime());
+
+        return t1 < t2;
+    });
+
+    //for first class, calc time from end time to next
+    //find distance between first class location and next class location
+    //save in vector
+
+    for (int i = 0; i <= static_cast<int>(sClasses.size()) - 1; i++) {
+        Class& ca = classes.at(sClasses[i]);
+        Class& cb = classes.at(sClasses[i + 1]);
+        int endTime = timeConvertor(ca.getEndTime());
+        int startTime = timeConvertor(cb.getStartTime());
+        int difference = startTime - endTime;
+        int distance = graph.printShortestEdges(stoi(ca.getLocationId()), stoi(cb.getLocationId()));
+        bool canMake;
+        if (distance == -1) {
+            canMake = false;
+        }
+        else if (distance > difference ) {
+            canMake = false;
+        }
+        else {
+            canMake = true;
+        }
+        classGap newClassGap(sClasses[i], sClasses[i + 1], canMake);
+        v.push_back(newClassGap);
+    }
+    return v;
 }

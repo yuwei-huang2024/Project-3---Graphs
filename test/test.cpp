@@ -8,6 +8,58 @@
 // #include "CampusCompass.h"
 using namespace std;
 
+TEST_CASE("test incorrect commands", "[unit tests]") {
+  CampusCompass c;
+  c.ParseCSV("data/edges.csv", "data/classes.csv");
+
+  REQUIRE("successful" == c.insert("insert \"Student A\" 10000001 1 1 COP3502"));
+  REQUIRE("unsuccessful" == c.insert("insert \"Student B\" 1 2 1 COP3502")); //uf id wrong
+  REQUIRE("unsuccessful" == c.insert("insert \"Student!\" 10000002 2 1 COP3502")); //name wrong
+  REQUIRE("unsuccessful" == c.insert("insert \"StudentB\" 10000002 2 7 COP3502 CIS4301 EEL3111 STA3032 ENC1102 MAC2311 CEN3031")); //too many classes
+  REQUIRE("unsuccessful" == c.insert("insert \"Student B\" 10000002 2 1 COP2")); //class code wrong
+  REQUIRE("unsuccessful" == c.insert("insert \"Student B\" 10000001 2 1 COP3502")); //reused uf ID
+}
+
+TEST_CASE("edge cases", "[unit tests]") {
+  CampusCompass c;
+  c.ParseCSV("data/edges.csv", "data/classes.csv");
+
+  c.insert("insert \"Student A\" 10000001 1 3 COP3502 EEL3111 STA3032");
+  REQUIRE("unsuccessful" == c.remove("10000002")); //student does not exists
+  REQUIRE("unsuccessful" == c.dropClass("10000001", "CIS4301")); //student not taking this class
+  REQUIRE("unsuccessful" == c.replaceClass("10000001","COP3502", "STA3032")); //student is already taking replacement class
+}
+
+TEST_CASE("dropClass, removeClass, remove, replaceClass", "[unit tests]") {
+  CampusCompass c;
+  c.ParseCSV("data/edges.csv", "data/classes.csv");
+
+  c.insert("insert \"Student A\" 10000001 1 3 COP3502 EEL3111 STA3032");
+  c.insert("insert \"Student B\" 10000002 2 3 COP3502 EEL3111 STA3032");
+  REQUIRE("successful" == c.dropClass("10000001", "COP3502"));
+  REQUIRE(2 == c.removeClass("EEL3111"));
+
+  unordered_map<string, Student> myMap = c.GetStudents();
+  myMap = c.GetStudents(); // students a and b
+  REQUIRE(myMap.size() == 2);
+  REQUIRE("successful" == c.remove("10000001"));
+  myMap = c.GetStudents(); // student b only
+  REQUIRE(myMap.size() == 1);
+
+  REQUIRE("successful" == c.replaceClass("10000002", "STA3032", "MAC2311"));
+}
+
+TEST_CASE("printShortestEdges", "[unit tests]") {
+  CampusCompass c;
+  c.ParseCSV("data/edges.csv", "data/classes.csv");
+
+  c.insert("insert \"Student A\" 10000001 49 1 PHY2049"); //PHY2049 is at 56
+  REQUIRE("successful" == c.isConnected(49, 56));
+  vector<int> v = {49, 56};
+  c.toggleEdgesClosure(1, v);
+  REQUIRE("unsuccessful" == c.isConnected(49, 56));
+}
+
 TEST_CASE("test Student Class", "[student]") {
   Student James = Student("James", "1234", 4);
   Student Joseph = Student("Joseph", "1234", 4);
@@ -93,7 +145,6 @@ TEST_CASE("test campusCompass", "[csv]") {
 TEST_CASE("test removeClass", "[csv]") {
   CampusCompass c;
   c.ParseCSV("data/edges.csv", "data/classes.csv");
-  c.insert("insert \"Student A\" 10000001 1 1 COP3502");
   c.insert("insert \"Student B\" 10000002 1 1 COP3502");
   c.insert("insert \"Student C\" 10000003 1 1 COP3502");
   c.insert("insert \"Student D\" 10000004 1 1 COP3502");
@@ -103,44 +154,3 @@ TEST_CASE("test removeClass", "[csv]") {
   REQUIRE(c.GetStudents().empty());
 
 }
-
-// See the following for an example of how to easily test your output.
-// Note that while this works, I recommend also creating plenty of unit tests for particular functions within your code.
-// This pattern should only be used for final, end-to-end testing.
-
-// This uses C++ "raw strings" and assumes your CampusCompass outputs a string with
-//   the same thing you print.
-// TEST_CASE("Example CampusCompass Output Test", "[flag]") {
-//   // the following is a "raw string" - you can write the exact input (without
-//   //   any indentation!) and it should work as expected
-//   // this is based on the input and output of the first public test case
-//   string input = R"(6
-// insert "Student A" 10000001 1 1 COP3502
-// insert "Student B" 10000002 1 1 COP3502
-// insert "Student C" 10000003 1 2 COP3502 MAC2311
-// dropClass 10000001 COP3502
-// remove 10000001
-// removeClass COP3502
-// )";
-//
-//   string expectedOutput = R"(successful
-// successful
-// successful
-// successful
-// unsuccessful
-// 2
-// )";
-//
-//   string actualOutput;
-//
-//   // somehow pass your input into your CampusCompass and parse it to call the
-//   // correct functions, for example:
-//   /*
-//   CampusCompass c;
-//   c.parseInput(input)
-//   // this would be some function that sends the output from your class into a string for use in testing
-//   actualOutput = c.getStringRepresentation()
-//   */
-//
-//   REQUIRE(actualOutput == expectedOutput);
-// }

@@ -9,6 +9,22 @@
 
 using namespace std;
 
+struct classGap {
+    string fromClass;
+    string toClass;
+    bool canMake;
+
+    classGap(string from, string to, bool canMake) {
+        this->fromClass = from;
+        this->toClass = to;
+        this->canMake = canMake;
+    }
+
+    string getFromClass() {return fromClass;}
+    string getToClass() {return toClass;}
+    bool getCanMake() {return canMake;}
+};
+
 class CampusCompass {
     Graph graph;
     unordered_map<string, Student> students;
@@ -30,5 +46,7 @@ public:
     string checkEdgeStatus(int edge1, int edge2);
     string isConnected(int edge1, int edge2);
     map<string, int> printShortestEdges(string id);
-    string verifySchedule(string id);
+    int printStudentZone(string id);
+    vector<classGap> verifySchedule(string id);
+    bool isClassCode (string code);
 };
